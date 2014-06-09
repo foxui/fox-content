@@ -1,0 +1,11 @@
+fox-listview {
+	overflow: auto;
+	-webkit-overflow-scrolling: touch;
+}
+.fox-listview-pulltorefresh {
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: -9999px;
+}
+

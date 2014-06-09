@@ -1,0 +1,112 @@
+<fox-element name="fox-listview" >
+    <fox-template>
+        <div id="fox-listview-scroller">
+            <div id="fox-listview-pulltorefresh" class="fox-listview-pulltorefresh">
+                <div id="pulltorefresh-inner">
+                    <div style="height: 50px;line-height: 50px;text-align: center;">
+                        
+                    </div>    
+                </div>
+            </div>
+            <div class="fox-listview-content">
+                <content></content>
+            </div>
+        </div>
+
+    </fox-template>
+    <script>
+		
+
+		function setupPulltorefresh() {
+		    
+		    function translateDom(dist, speed) {
+		        pulltorefreshInner.className =  "pulltorefresh-state-"+parseInt((dist/pulltorefreshHeight));
+		        console.info(pulltorefreshInner.className);
+                scroller.style.webkitTransitionDuration = scroller.style.MozTransitionDuration = scroller.style.msTransitionDuration = scroller.style.OTransitionDuration = scroller.style.transitionDuration = speed + 'ms';
+                scroller.style.webkitTransform = 'translate(0,' + dist + 'px)' + 'translateZ(0)';
+                scroller.style.msTransform = scroller.style.MozTransform = scroller.style.OTransform = 'translateY(' + dist + 'px)';
+            }
+            
+		    var $pulltorefresh = $(this.$['fox-listview-pulltorefresh']);
+		    var pulltorefreshInner = this.$['pulltorefresh-inner'];
+			var pulltorefreshHeight = $pulltorefresh.height();
+			$(this.$['fox-listview-pulltorefresh']).css({
+				top : -pulltorefreshHeight + "px"
+			});
+			var scroller = this.$['fox-listview-scroller'];
+			var startY, startTop;
+			var translateY = 0,endTranslateY = 0;
+			this.addEventListener("touchstart", function(e) {
+				startY = e.touches[0].pageY;
+				startTop = $(this).scrollTop();
+
+			}, true);
+			this.addEventListener("touchmove", function(e) {
+				var deltaY = (e.touches[0].pageY - startY) * 0.35;
+				if ($(this).scrollTop() <= 0 && endTranslateY == 0) {
+
+					if (deltaY > 0) {
+						translateY = deltaY;
+						translateDom(deltaY, 0);
+						e.preventDefault();
+					}
+
+				} else {
+					startY = e.touches[0].pageY;
+				}
+
+			}, true);
+
+			this.addEventListener("touchend", function(e) {
+				if (translateY >= pulltorefreshHeight) {
+				    translateY = pulltorefreshHeight;
+				    endTranslateY = translateY;
+				    translateDom(pulltorefreshHeight,200);
+					onRefresh && onRefresh.call(this);
+				}else{
+				    ret.refreshComplete();
+				}
+
+			}, true);
+
+			var onRefresh;
+
+			var ret = {
+				refreshComplete : function() {
+					translateDom(0, 200);
+					translateY = 0;
+					endTranslateY = 0;
+				},
+				onRefresh : function(callback) {
+					onRefresh = callback;
+				}
+			}
+
+			return ret;
+
+		}
+        
+        var pulltorefresh;
+        
+		fox("fox-listview", {
+			lifecycle : {
+				created : function() {
+
+				},
+				inserted : function() {
+					pulltorefresh = setupPulltorefresh.apply(this);
+				}
+			},
+			methods : {
+				refreshComplete : function(){
+				    pulltorefresh.refreshComplete();
+				},
+				onRefresh:function(callback){
+				    debugger;
+				    pulltorefresh.onRefresh(callback);
+				}
+			}
+		});
+    </script>
+
+</fox-element>
