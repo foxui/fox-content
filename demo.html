@@ -2,17 +2,21 @@
 <html>
     <head>
         <meta charset="utf-8"/>
-        <script src="http://172.22.72.147:8085/target/target-script-min.js#anonymous"></script>
+        
         <title>fox-listview</title>
-
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
         <!-- 1. Load platform support before any code that touches the DOM. -->
         <link rel="stylesheet" href="fox-listview.css">
-        
+        <style>
+            *{
+                margin: 0;
+                padding: 0;
+            }
+        </style>
 
-        <script src="fox-core/dist/foxui.js?v=123"></script>
+        <script src="../fox-core/dist/foxui.js?v=123"></script>
         <!-- 2. Load the component using an HTML Import -->
-        <link rel="import" href="fox-listview.html?v=123">
+        <link rel="import" href="fox-listview.html">
         <style>
 			fox-listview {
 				position: absolute;
@@ -30,7 +34,7 @@
 
         </style>
     </head>
-    <body>
+    <body >
         <fox-listview>
             <ul>
                 <li rv-each-date="datas">
@@ -53,6 +57,7 @@
         window.addEventListener('HTMLImportsLoaded', function(e) {
             listview = $("fox-listview").get(0);
             refresh();
+            
             listview.onRefresh(function(){
                 
                 
