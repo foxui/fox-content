@@ -1,6 +1,3 @@
-@import url("icon/css/icon.css");
-@import url("icon/css/animation.css");
-
 fox-listview {
 	overflow: auto;
 	-webkit-overflow-scrolling: touch;
