@@ -5,7 +5,7 @@ fox-content {
 	
 }
 
-fox-content .fox-listview-scroller{
+fox-content .fox-content-scroller{
 	-webkit-transform: translateZ(0px);
 }
 fox-refresher {
@@ -14,15 +14,15 @@ fox-refresher {
 	right: 0;
 	top: -9999px;
 	display: block;
+	
 }
+
 .fox-refresher-content{
 	display: block;
 	
 	
 }
-fox-refresher{
-	display: block;
-}
+
 fox-refresher .fox-refresher-default i:before {
 	font-size: 20px;
 }
@@ -33,7 +33,7 @@ fox-refresher.fox-refresher-status-up .fox-refresher-icon-loading {
 	display: none;
 }
 
-fox-refresher label:after{
+fox-refresher .fox-refresher-label:after{
 	content: "下拉刷新...";
 	
 }
