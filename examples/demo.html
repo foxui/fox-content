@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8"/>
+       
+        <title>fox-listview</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+        <link rel="stylesheet" href="../../fox-core/dist/foxui.css"/>
+        <link rel="stylesheet" href="../../fox-icon/dist/css/animation.css"/>
+        <link rel="stylesheet" href="../../fox-icon/dist/css/fox-icon.css"/>
+        <link rel="stylesheet" href="../dist/fox-listview.css">
+        <style>
+			* {
+				margin: 0;
+				padding: 0;
+			}
+        </style>
+
+        <script src="../../fox-core/dist/foxui.js"></script>
+        <link rel="import" href="../dist/fox-listview.html">
+        <style>
+			fox-listview {
+				position: absolute;
+				left: 0;
+				top: 0;
+				right: 0;
+				bottom: 0;
+				background: #fff;
+			}
+
+			li {
+				padding: 15px;
+			}
+
+        </style>
+    </head>
+    <body >
+        <fox-listview>
+            <fox-listview-pulltorefresh id="pulltorefresh">
+                <div class="fox-pulltorefresh-default">
+                    <i class="fox-pulltorefresh-icon-indicator icon-up-1"></i>
+                    <i class="fox-pulltorefresh-icon-loading icon-spin5  animate-spin"></i>
+                    <label class="fox-pulltorefresh-label"></label>
+                </div>
+            </fox-listview-pulltorefresh>
+            <fox-infinite-scroll></fox-infinite-scroll>
+            <fox-listview-content>
+                <ul>
+                    <li rv-each-date="datas">
+                        {date}
+                    </li>
+                </ul>
+            </fox-listview-content>
+        </fox-listview>
+        <script>
+			var listview;
+
+			function refresh() {
+				var datas = [];
+				for (var i = 0; i < 30; i++) {
+					datas.push(+new Date);
+				}
+				listview.datas = datas;
+			}
+
+
+			window.addEventListener('HTMLImportsLoaded', function(e) {
+				listview = $("fox-listview").get(0);
+				refresh();
+				
+				document.getElementById("pulltorefresh").addEventListener("refresh",function(){
+				    var self = this;
+				    setTimeout(function() {
+                        refresh();
+                        self.refreshComplete();
+                    }, 3000);
+				},false);
+
+
+			});
+
+        </script>
+    </body>
+</html>

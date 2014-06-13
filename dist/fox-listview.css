@@ -1,0 +1,81 @@
+fox-listview
+{
+    overflow: auto;
+
+    -webkit-transform: translateZ(0px);
+
+    -webkit-overflow-scrolling: touch;
+}
+
+fox-listview .fox-listview-scroller
+{
+    -webkit-transform: translateZ(0px);
+}
+fox-listview-pulltorefresh
+{
+    position: absolute;
+    top: -9999px;
+    right: 0;
+    left: 0;
+
+    display: block;
+}
+.fox-pulltorefresh-content
+{
+    display: block;
+}
+fox-listview-pulltorefresh
+{
+    display: block;
+}
+fox-listview-pulltorefresh .fox-pulltorefresh-default i:before
+{
+    font-size: 20px;
+}
+fox-listview-pulltorefresh .fox-pulltorefresh-icon-loading
+{
+    display: none;
+}
+fox-listview-pulltorefresh.pulltorefresh-state-0 .fox-pulltorefresh-icon-loading
+{
+    display: none;
+}
+
+fox-listview-pulltorefresh label:after
+{
+    content: '下拉刷新...';
+}
+fox-listview-pulltorefresh.pulltorefresh-state-1 .fox-pulltorefresh-label:after
+{
+    content: '放开以刷新...';
+}
+fox-listview-pulltorefresh.pulltorefresh-state-loading .fox-pulltorefresh-label:after
+{
+    content: '正在载入...';
+}
+fox-listview-pulltorefresh .fox-pulltorefresh-icon-indicator:before
+{
+    -webkit-transition: all .3s linear;
+    -webkit-transform: rotate(0deg);
+}
+fox-listview-pulltorefresh.pulltorefresh-state-1 .fox-pulltorefresh-icon-indicator:before
+{
+    -webkit-transform: rotate(180deg);
+}
+fox-listview-pulltorefresh.pulltorefresh-state-loading .fox-pulltorefresh-icon-loading
+{
+    display: inline-block;
+}
+
+fox-listview-pulltorefresh.pulltorefresh-state-loading .fox-pulltorefresh-icon-indicator
+{
+    display: none;
+}
+.fox-pulltorefresh-default
+{
+    line-height: 65px;
+
+    height: 65px;
+
+    text-align: center;
+}

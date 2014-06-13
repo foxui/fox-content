@@ -2,6 +2,7 @@
   "name": "fox-listview",
   "private": true,
   "dependencies": {
-    "fox-core": "https://github.com/foxui/fox-core.git"
+    "fox-core": "https://github.com/foxui/fox-core.git",
+    "fox-icon": "https://github.com/foxui/fox-icon.git"
   }
 }

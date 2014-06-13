@@ -1,0 +1,148 @@
+<fox-element name="fox-listview-pulltorefresh">
+    <fox-template>
+        <div id="fox-pulltorefresh-content" class="fox-pulltorefresh-content">
+            <content></content>
+        </div>
+    </fox-template>
+    <script>
+        
+        fox("fox-listview-pulltorefresh",{
+            lifecycle:{
+                created:function(){
+                    
+                },
+                inserted:function(){
+                    var pulltorefreshHeight = $(this).height();
+                    $(this).css({
+                        top : -pulltorefreshHeight + "px"
+                    });
+                }
+            },
+            methods:{
+                refreshComplete:function(){
+                    $(this).closest("fox-listview").get(0)._refreshComplete();
+                }
+            }
+        });
+        
+    </script>
+
+</fox-element>
+
+<fox-element name="fox-listview" >
+    <fox-template>
+        <div id="fox-listview-scroller" class="fox-listview-scroller">
+            <content></content>
+        </div>
+
+    </fox-template>
+    <script>
+		function setupPulltorefresh($pulltorefresh) {
+
+			function translateDom(dist, speed) {
+			    var height = dist-$(self).scrollTop();
+				$pulltorefresh.get(0).className = "pulltorefresh-state-" + Math.min(parseInt((height / pulltorefreshHeight)), 1);
+                
+				scroller.style.webkitTransitionDuration = scroller.style.MozTransitionDuration = scroller.style.msTransitionDuration = scroller.style.OTransitionDuration = scroller.style.transitionDuration = speed + 'ms';
+				scroller.style.webkitTransform = 'translate3d(0,' + dist + 'px,0)';
+				scroller.style.msTransform = scroller.style.MozTransform = scroller.style.OTransform = 'translateY(' + dist + 'px)';
+			}
+
+			var $listviewContent = $(this.$['fox-listview-content']);
+			var $pulltorefreshContent = $(this.$['fox-pulltorefresh-content']);
+			var pulltorefreshInner = this.$['pulltorefresh-inner'];
+			var pulltorefreshHeight = $pulltorefresh.height();
+			var self = this;
+			var scroller = this.$['fox-listview-scroller'];
+			scroller.addEventListener('webkitTransitionEnd', function() {
+				setTimeout(function() {
+					$listviewContent.height($listviewContent.height() + 1);
+				}, 50);
+
+			}, false);
+			var startY, startTop;
+			var translateY = 0, endTranslateY = 0;
+			this.addEventListener("touchstart", function(e) {
+				startY = e.touches[0].pageY;
+				startTop = $(this).scrollTop();
+
+			}, true);
+			this.addEventListener("touchmove", function(e) {
+				var deltaY = (e.touches[0].pageY - startY) * 0.35;
+                
+				if(!isRefreshing){
+				    if ($(this).scrollTop() <= 0) {
+                        if (deltaY > 0 && endTranslateY == 0) {
+                            translateY = $(this).scrollTop() + deltaY;
+                            translateDom($(this).scrollTop() + deltaY, 0);
+                            e.preventDefault();
+                        }
+    
+                    } else {
+                        
+                        startY = e.touches[0].pageY;
+                    }
+				}
+				
+
+			}, true);
+            
+            var isRefreshing = false;
+            
+			this.addEventListener("touchend", function(e) {
+			    if(!isRefreshing){
+			        if (translateY-$(self).scrollTop() >= pulltorefreshHeight ) {
+                        translateY = pulltorefreshHeight;
+                        endTranslateY = translateY;
+                        translateDom(pulltorefreshHeight, 200);
+                        xtag.fireEvent($pulltorefresh.get(0), 'refresh', {});
+                        isRefreshing = true;
+                        $pulltorefresh.get(0).className = "pulltorefresh-state-loading";
+                    } else {
+                        ret.refreshComplete();
+                    }
+			    }
+				
+
+			}, true);
+
+			var ret = {
+				refreshComplete : function() {
+				    // $(scroller).scrollTo(0);
+				    isRefreshing = false;
+					$pulltorefresh.get(0).className = "pulltorefresh-state";
+					translateDom(0, 200);
+
+					translateY = 0;
+					endTranslateY = 0;
+				}
+			}
+
+			return ret;
+
+		}
+
+		var pulltorefresh;
+
+		fox("fox-listview", {
+			lifecycle : {
+				created : function() {
+				    var $pulltorefresh = $("fox-listview-pulltorefresh",this);
+				    if($pulltorefresh.size()>0){
+				        pulltorefresh = setupPulltorefresh.call(this,$pulltorefresh);
+				    }
+				},
+				inserted : function() {
+
+				}
+			},
+			methods : {
+				_refreshComplete : function() {
+
+					pulltorefresh && pulltorefresh.refreshComplete();
+				}
+			}
+		});
+    </script>
+
+</fox-element>
