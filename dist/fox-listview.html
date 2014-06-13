@@ -29,6 +29,10 @@
 
 </fox-element>
 
+<fox-element name="fox-infinite-scroll">
+    
+</fox-element>
+
 <fox-element name="fox-listview" >
     <fox-template>
         <div id="fox-listview-scroller" class="fox-listview-scroller">
@@ -121,6 +125,13 @@
 			return ret;
 
 		}
+		
+		function setupInfiniteScroll($infiniteScroll){
+		    $(this).bind("scroll",function(){
+		       
+		       console.info(,this.scrollHeight,$(this).height());
+		    });
+		}
 
 		var pulltorefresh;
 
@@ -131,6 +142,12 @@
 				    if($pulltorefresh.size()>0){
 				        pulltorefresh = setupPulltorefresh.call(this,$pulltorefresh);
 				    }
+				    var $infiniteScroll = $("fox-infinite-scroll",this);
+				    
+				    if($infiniteScroll.size()>0){
+				        setupInfiniteScroll.call(this,$infiniteScroll);
+				    }
+				    
 				},
 				inserted : function() {
 

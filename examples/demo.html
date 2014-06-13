@@ -2,7 +2,7 @@
 <html>
     <head>
         <meta charset="utf-8"/>
-       
+
         <title>fox-listview</title>
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
         <link rel="stylesheet" href="../../fox-core/dist/foxui.css"/>
@@ -17,7 +17,7 @@
         </style>
 
         <script src="../../fox-core/dist/foxui.js"></script>
-        <link rel="import" href="../dist/fox-listview.html">
+        <link rel="import" href="../src/fox-listview.html">
         <style>
 			fox-listview {
 				position: absolute;
@@ -43,13 +43,17 @@
                     <label class="fox-pulltorefresh-label"></label>
                 </div>
             </fox-listview-pulltorefresh>
-            <fox-infinite-scroll></fox-infinite-scroll>
-            <fox-listview-content>
+            <fox-infinite-scroll id="infiniteScroll" distance="60"></fox-infinite-scroll>
+            <fox-listview-content style="display: block;">
                 <ul>
                     <li rv-each-date="datas">
                         {date}
                     </li>
                 </ul>
+                <div style="overflow: hidden; font-size: 20px; height:60px;line-height: 60px;text-align: center;display: block;">
+                    <i class="icon-spin5 animate-spin" ></i>
+                </div>
+
             </fox-listview-content>
         </fox-listview>
         <script>
@@ -63,19 +67,37 @@
 				listview.datas = datas;
 			}
 
+			function loadMore() {
+
+				var datas = [];
+				for (var i = 0; i < 30; i++) {
+					datas.push(+new Date);
+				}
+				listview.datas = listview.datas.concat(datas);
+			}
+
 
 			window.addEventListener('HTMLImportsLoaded', function(e) {
 				listview = $("fox-listview").get(0);
 				refresh();
-				
-				document.getElementById("pulltorefresh").addEventListener("refresh",function(){
-				    var self = this;
-				    setTimeout(function() {
-                        refresh();
-                        self.refreshComplete();
-                    }, 3000);
-				},false);
 
+				document.getElementById("infiniteScroll").addEventListener("infinite", function() {
+					var self = this;
+
+					setTimeout(function() {
+						loadMore();
+						self.infiniteComplete();
+					}, 3000);
+
+				}, false);
+
+				document.getElementById("pulltorefresh").addEventListener("refresh", function() {
+					var self = this;
+					setTimeout(function() {
+						refresh();
+						self.refreshComplete();
+					}, 3000);
+				}, false);
 
 			});
 

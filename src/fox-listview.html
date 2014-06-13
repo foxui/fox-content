@@ -21,12 +21,52 @@
             methods:{
                 refreshComplete:function(){
                     $(this).closest("fox-listview").get(0)._refreshComplete();
+                },
+                fireRefresh:function(){
+                    xtag.fireEvent(this, 'refresh', {});
                 }
+                
             }
         });
         
     </script>
 
+</fox-element>
+
+<fox-element name="fox-infinite-scroll" attributes="distance">
+    <script>
+        fox("fox-infinite-scroll",{
+            lifecycle:{
+                created:function(){
+                    this.distance = this.distance || 0;
+                    this.enable = true;   
+                }
+            },
+            methods:{
+                getDistance:function(height){
+                    var distance = this.distance;
+                    
+                    var pattrn = /(\d+)(%?)/.exec(distance);
+                    if (!pattrn || pattrn[2]=="") {
+                        return height-(parseInt(distance)||0);
+                    }
+                    if (pattrn[2] != "") {
+                        return height-(height * pattrn[1] / 100);
+                    }
+                },
+                fireInfinite:function(){
+                    if(this.enable){
+                        this.enable = false;
+                        xtag.fireEvent(this, 'infinite', {});    
+                    }
+                    
+                },
+                infiniteComplete:function(){
+                    this.enable = true;
+                }
+            }
+        });
+    </script>
 </fox-element>
 
 <fox-element name="fox-listview" >
@@ -79,7 +119,6 @@
                         }
     
                     } else {
-                        
                         startY = e.touches[0].pageY;
                     }
 				}
@@ -95,7 +134,7 @@
                         translateY = pulltorefreshHeight;
                         endTranslateY = translateY;
                         translateDom(pulltorefreshHeight, 200);
-                        xtag.fireEvent($pulltorefresh.get(0), 'refresh', {});
+                        $pulltorefresh.get(0).fireRefresh();
                         isRefreshing = true;
                         $pulltorefresh.get(0).className = "pulltorefresh-state-loading";
                     } else {
@@ -121,6 +160,16 @@
 			return ret;
 
 		}
+		
+		function setupInfiniteScroll($infiniteScroll){
+		    var infiniteScroll = $infiniteScroll.get(0);
+		    $(this).bind("scroll",function(){
+		        if(this.scrollTop+$(this).height()>= infiniteScroll.getDistance(this.scrollHeight)){
+		            infiniteScroll.fireInfinite();
+		        }
+		       
+		    });
+		}
 
 		var pulltorefresh;
 
@@ -131,6 +180,12 @@
 				    if($pulltorefresh.size()>0){
 				        pulltorefresh = setupPulltorefresh.call(this,$pulltorefresh);
 				    }
+				    var $infiniteScroll = $("fox-infinite-scroll",this);
+				    
+				    if($infiniteScroll.size()>0){
+				        setupInfiniteScroll.call(this,$infiniteScroll);
+				    }
+				    
 				},
 				inserted : function() {
 
