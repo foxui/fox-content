@@ -1,12 +1,12 @@
-<fox-element name="fox-listview-pulltorefresh">
+<fox-element name="fox-refresher">
     <fox-template>
-        <div id="fox-pulltorefresh-content" class="fox-pulltorefresh-content">
+        <div id="fox-refresher-content" class="fox-refresher-content">
             <content></content>
         </div>
     </fox-template>
     <script>
         
-        fox("fox-listview-pulltorefresh",{
+        fox("fox-refresher",{
             lifecycle:{
                 created:function(){
                     
@@ -20,8 +20,12 @@
             },
             methods:{
                 refreshComplete:function(){
-                    $(this).closest("fox-listview").get(0)._refreshComplete();
+                    $(this).closest("fox-content").get(0)._refreshComplete();
+                },
+                fireRefresh:function(){
+                    xtag.fireEvent(this, 'refresh', {});
                 }
+                
             }
         });
         
@@ -29,13 +33,45 @@
 
 </fox-element>
 
-<fox-element name="fox-infinite-scroll">
-    
+<fox-element name="fox-infinite-scroll" attributes="distance">
+    <script>
+        fox("fox-infinite-scroll",{
+            lifecycle:{
+                created:function(){
+                    this.distance = this.distance || 0;
+                    this.enable = true;   
+                }
+            },
+            methods:{
+                getDistance:function(height){
+                    var distance = this.distance;
+                    
+                    var pattrn = /(\d+)(%?)/.exec(distance);
+                    if (!pattrn || pattrn[2]=="") {
+                        return height-(parseInt(distance)||0);
+                    }
+                    if (pattrn[2] != "") {
+                        return height-(height * pattrn[1] / 100);
+                    }
+                },
+                fireInfinite:function(){
+                    if(this.enable){
+                        this.enable = false;
+                        xtag.fireEvent(this, 'infinite', {});    
+                    }
+                    
+                },
+                infiniteComplete:function(){
+                    this.enable = true;
+                }
+            }
+        });
+    </script>
 </fox-element>
 
-<fox-element name="fox-listview" >
+<fox-element name="fox-content" >
     <fox-template>
-        <div id="fox-listview-scroller" class="fox-listview-scroller">
+        <div id="fox-content-scroller" class="fox-content-scroller">
             <content></content>
         </div>
 
@@ -45,22 +81,22 @@
 
 			function translateDom(dist, speed) {
 			    var height = dist-$(self).scrollTop();
-				$pulltorefresh.get(0).className = "pulltorefresh-state-" + Math.min(parseInt((height / pulltorefreshHeight)), 1);
+			    var className = Math.min(parseInt((height / pulltorefreshHeight)), 1) === 0 ? "up":"down";
+				$pulltorefresh.get(0).className = "fox-refresher-status-" + className;
                 
 				scroller.style.webkitTransitionDuration = scroller.style.MozTransitionDuration = scroller.style.msTransitionDuration = scroller.style.OTransitionDuration = scroller.style.transitionDuration = speed + 'ms';
 				scroller.style.webkitTransform = 'translate3d(0,' + dist + 'px,0)';
 				scroller.style.msTransform = scroller.style.MozTransform = scroller.style.OTransform = 'translateY(' + dist + 'px)';
 			}
 
-			var $listviewContent = $(this.$['fox-listview-content']);
-			var $pulltorefreshContent = $(this.$['fox-pulltorefresh-content']);
-			var pulltorefreshInner = this.$['pulltorefresh-inner'];
+			var $content = $(this.$['fox-listview-content']);
+			var $refresherContent = $(this.$['fox-refresher-content']);
 			var pulltorefreshHeight = $pulltorefresh.height();
 			var self = this;
-			var scroller = this.$['fox-listview-scroller'];
+			var scroller = this.$['fox-content-scroller'];
 			scroller.addEventListener('webkitTransitionEnd', function() {
 				setTimeout(function() {
-					$listviewContent.height($listviewContent.height() + 1);
+					$content.height($content.height() + 1);
 				}, 50);
 
 			}, false);
@@ -83,7 +119,6 @@
                         }
     
                     } else {
-                        
                         startY = e.touches[0].pageY;
                     }
 				}
@@ -99,9 +134,9 @@
                         translateY = pulltorefreshHeight;
                         endTranslateY = translateY;
                         translateDom(pulltorefreshHeight, 200);
-                        xtag.fireEvent($pulltorefresh.get(0), 'refresh', {});
+                        $pulltorefresh.get(0).fireRefresh();
                         isRefreshing = true;
-                        $pulltorefresh.get(0).className = "pulltorefresh-state-loading";
+                        $pulltorefresh.get(0).className = "fox-refresher-status-loading";
                     } else {
                         ret.refreshComplete();
                     }
@@ -112,11 +147,9 @@
 
 			var ret = {
 				refreshComplete : function() {
-				    // $(scroller).scrollTo(0);
 				    isRefreshing = false;
-					$pulltorefresh.get(0).className = "pulltorefresh-state";
+					$pulltorefresh.get(0).className = "fox-refresher-status-up";
 					translateDom(0, 200);
-
 					translateY = 0;
 					endTranslateY = 0;
 				}
@@ -127,18 +160,21 @@
 		}
 		
 		function setupInfiniteScroll($infiniteScroll){
+		    var infiniteScroll = $infiniteScroll.get(0);
 		    $(this).bind("scroll",function(){
+		        if(this.scrollTop+$(this).height()>= infiniteScroll.getDistance(this.scrollHeight)){
+		            infiniteScroll.fireInfinite();
+		        }
 		       
-		       console.info(,this.scrollHeight,$(this).height());
 		    });
 		}
 
 		var pulltorefresh;
 
-		fox("fox-listview", {
+		fox("fox-content", {
 			lifecycle : {
 				created : function() {
-				    var $pulltorefresh = $("fox-listview-pulltorefresh",this);
+				    var $pulltorefresh = $("fox-refresher",this);
 				    if($pulltorefresh.size()>0){
 				        pulltorefresh = setupPulltorefresh.call(this,$pulltorefresh);
 				    }

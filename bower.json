@@ -1,5 +1,5 @@
 {
-  "name": "fox-listview",
+  "name": "fox-content",
   "private": true,
   "dependencies": {
     "fox-core": "https://github.com/foxui/fox-core.git",

@@ -3,12 +3,12 @@
     <head>
         <meta charset="utf-8"/>
 
-        <title>fox-listview</title>
+        <title>fox-content</title>
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
         <link rel="stylesheet" href="../../fox-core/dist/foxui.css"/>
         <link rel="stylesheet" href="../../fox-icon/dist/css/animation.css"/>
         <link rel="stylesheet" href="../../fox-icon/dist/css/fox-icon.css"/>
-        <link rel="stylesheet" href="../dist/fox-listview.css">
+        <link rel="stylesheet" href="../dist/fox-content.css">
         <style>
 			* {
 				margin: 0;
@@ -17,9 +17,9 @@
         </style>
 
         <script src="../../fox-core/dist/foxui.js"></script>
-        <link rel="import" href="../src/fox-listview.html">
+        <link rel="import" href="../dist/fox-content.html">
         <style>
-			fox-listview {
+			fox-content {
 				position: absolute;
 				left: 0;
 				top: 0;
@@ -35,14 +35,14 @@
         </style>
     </head>
     <body >
-        <fox-listview>
-            <fox-listview-pulltorefresh id="pulltorefresh">
-                <div class="fox-pulltorefresh-default">
-                    <i class="fox-pulltorefresh-icon-indicator icon-up-1"></i>
-                    <i class="fox-pulltorefresh-icon-loading icon-spin5  animate-spin"></i>
-                    <label class="fox-pulltorefresh-label"></label>
+        <fox-content>
+            <fox-refresher id="pulltorefresh">
+                <div class="fox-refresher-default">
+                    <i class="fox-refresher-icon-indicator icon-up-1"></i>
+                    <i class="fox-refresher-icon-loading icon-spin5  animate-spin"></i>
+                    <label class="fox-refresher-label"></label>
                 </div>
-            </fox-listview-pulltorefresh>
+            </fox-refresher>
             <fox-infinite-scroll id="infiniteScroll" distance="60"></fox-infinite-scroll>
             <fox-listview-content style="display: block;">
                 <ul>
@@ -55,7 +55,7 @@
                 </div>
 
             </fox-listview-content>
-        </fox-listview>
+        </fox-content>
         <script>
 			var listview;
 
@@ -78,7 +78,7 @@
 
 
 			window.addEventListener('HTMLImportsLoaded', function(e) {
-				listview = $("fox-listview").get(0);
+				listview = $("fox-content").get(0);
 				refresh();
 
 				document.getElementById("infiniteScroll").addEventListener("infinite", function() {
