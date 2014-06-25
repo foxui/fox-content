@@ -1,191 +1,197 @@
 <link rel="stylesheet" href="../../fox-icon/dist/css/fox-icon.css"/>
 <link rel="stylesheet" href="css/fox-content.css">
 <fox-element name="fox-refresher">
-    <tpl>
-        <div id="fox-refresher-content" class="fox-refresher-content">
-            <content></content>
-        </div>
-    </tpl>
-    <script>
-        
-        fox("fox-refresher",{
-            lifecycle:{
-                created:function(){
-                    
-                },
-                inserted:function(){
-                    var pulltorefreshHeight = $(this).height();
-                    $(this).css({
-                        top : -pulltorefreshHeight + "px"
-                    });
-                }
-            },
-            methods:{
-                refreshComplete:function(){
-                    $(this).closest("fox-content").get(0)._refreshComplete();
-                },
-                fireRefresh:function(){
-                    xtag.fireEvent(this, 'refresh', {});
-                }
-                
-            }
-        });
-        
-    </script>
+	<tpl>
+		<div id="fox-refresher-content" class="fox-refresher-content">
+			<content></content>
+		</div>
+	</tpl>
+	<script>
+		fox("fox-refresher", {
+			lifecycle : {
+				created : function() {
+
+				},
+				inserted : function() {
+
+				}
+			},
+			methods : {
+				refreshComplete : function() {
+					$(this).closest("fox-content").get(0)._refreshComplete();
+				},
+				fireRefresh : function() {
+					xtag.fireEvent(this, 'refresh', {});
+				},
+				init : function() {
+
+					var pulltorefreshHeight = $(this).height();
+					$(this).css({
+						top : -pulltorefreshHeight + "px"
+					});
+
+				}
+			}
+		});
+
+	</script>
 
 </fox-element>
 
 <fox-element name="fox-infinite-scroll" attributes="distance">
-    <script>
-        fox("fox-infinite-scroll",{
-            lifecycle:{
-                created:function(){
-                    this.distance = this.distance || 0;
-                    this.enable = true;   
-                }
-            },
-            methods:{
-                getDistance:function(height){
-                    var distance = this.distance;
-                    
-                    var pattrn = /(\d+)(%?)/.exec(distance);
-                    if (!pattrn || pattrn[2]=="") {
-                        return height-(parseInt(distance)||0);
-                    }
-                    if (pattrn[2] != "") {
-                        return height-(height * pattrn[1] / 100);
-                    }
-                },
-                fireInfinite:function(){
-                    if(this.enable){
-                        this.enable = false;
-                        xtag.fireEvent(this, 'infinite', {});    
-                    }
-                    
-                },
-                infiniteComplete:function(){
-                    this.enable = true;
-                }
-            }
-        });
-    </script>
+	<script>
+		fox("fox-infinite-scroll", {
+			lifecycle : {
+				created : function() {
+					this.distance = this.distance || 0;
+					this.enable = true;
+				}
+			},
+			methods : {
+				getDistance : function(height) {
+					var distance = this.distance;
+
+					var pattrn = /(\d+)(%?)/.exec(distance);
+					if (!pattrn || pattrn[2] == "") {
+						return height - (parseInt(distance) || 0);
+					}
+					if (pattrn[2] != "") {
+						return height - (height * pattrn[1] / 100);
+					}
+				},
+				fireInfinite : function() {
+					if (this.enable) {
+						this.enable = false;
+						xtag.fireEvent(this, 'infinite', {});
+					}
+
+				},
+				infiniteComplete : function() {
+					this.enable = true;
+				}
+			}
+		});
+	</script>
 </fox-element>
 
 <fox-element name="fox-content" >
-    <tpl>
-        <div id="fox-content-scroller" class="fox-content-scroller">
-            <content></content>
-        </div>
+	<tpl>
+		<div id="fox-content-scroller" class="fox-content-scroller">
+			<content></content>
+		</div>
 
-    </tpl>
-    <script>
-		function setupPulltorefresh($pulltorefresh) {
+	</tpl>
+	<script>
+		function FoxContent(el) {
 
-			function translateDom(dist, speed) {
-			    var height = dist-$(self).scrollTop();
-			    var className = Math.min(parseInt((height / pulltorefreshHeight)), 1) === 0 ? "up":"down";
-				$pulltorefresh.get(0).className = "fox-refresher-status-" + className;
-                
-				scroller.style.webkitTransitionDuration = scroller.style.MozTransitionDuration = scroller.style.msTransitionDuration = scroller.style.OTransitionDuration = scroller.style.transitionDuration = speed + 'ms';
-				scroller.style.webkitTransform = 'translate3d(0,' + dist + 'px,0)';
-				scroller.style.msTransform = scroller.style.MozTransform = scroller.style.OTransform = 'translateY(' + dist + 'px)';
+			this.setupInfiniteScroll = function($infiniteScroll) {
+				var infiniteScroll = $infiniteScroll.get(0);
+				$(el).bind("scroll", function() {
+					if (el.scrollTop + $(el).height() >= infiniteScroll.getDistance(el.scrollHeight)) {
+						infiniteScroll.fireInfinite();
+					}
+
+				});
 			}
 
-			var $content = $(this.$['fox-listview-content']);
-			var $refresherContent = $(this.$['fox-refresher-content']);
-			var pulltorefreshHeight = $pulltorefresh.height();
-			var self = this;
-			var scroller = this.$['fox-content-scroller'];
-			scroller.addEventListener('webkitTransitionEnd', function() {
-				setTimeout(function() {
-					$content.height($content.height() + 1);
-				}, 50);
+			this.setupPulltorefresh = function($pulltorefresh) {
 
-			}, false);
-			var startY, startTop;
-			var translateY = 0, endTranslateY = 0;
-			this.addEventListener("touchstart", function(e) {
-				startY = e.touches[0].pageY;
-				startTop = $(this).scrollTop();
+				function translateDom(dist, speed) {
+					var height = dist - $(el).scrollTop();
+					var className = Math.min(parseInt((height / pulltorefreshHeight)), 1) === 0 ? "up" : "down";
+					$pulltorefresh.get(0).className = "fox-refresher-status-" + className;
 
-			}, true);
-			this.addEventListener("touchmove", function(e) {
-				var deltaY = (e.touches[0].pageY - startY) * 0.35;
-                
-				if(!isRefreshing){
-				    if ($(this).scrollTop() <= 0) {
-                        if (deltaY > 0 && endTranslateY == 0) {
-                            translateY = $(this).scrollTop() + deltaY;
-                            translateDom($(this).scrollTop() + deltaY, 0);
-                            e.preventDefault();
-                        }
-    
-                    } else {
-                        startY = e.touches[0].pageY;
-                    }
+					scroller.style.webkitTransitionDuration = scroller.style.MozTransitionDuration = scroller.style.msTransitionDuration = scroller.style.OTransitionDuration = scroller.style.transitionDuration = speed + 'ms';
+					scroller.style.webkitTransform = 'translate3d(0,' + dist + 'px,0)';
+					scroller.style.msTransform = scroller.style.MozTransform = scroller.style.OTransform = 'translateY(' + dist + 'px)';
 				}
-				
 
-			}, true);
-            
-            var isRefreshing = false;
-            
-			this.addEventListener("touchend", function(e) {
-			    if(!isRefreshing){
-			        if (translateY-$(self).scrollTop() >= pulltorefreshHeight ) {
-                        translateY = pulltorefreshHeight;
-                        endTranslateY = translateY;
-                        translateDom(pulltorefreshHeight, 200);
-                        $pulltorefresh.get(0).fireRefresh();
-                        isRefreshing = true;
-                        $pulltorefresh.get(0).className = "fox-refresher-status-loading";
-                    } else {
-                        ret.refreshComplete();
-                    }
-			    }
-				
+				var $content = $(el.$['fox-listview-content']);
+				var $refresherContent = $(el.$['fox-refresher-content']);
+				var pulltorefreshHeight;
+				var self = this;
+				var scroller = el.$['fox-content-scroller'];
+				scroller.addEventListener('webkitTransitionEnd', function() {
+					setTimeout(function() {
+						$content.height($content.height() + 1);
+					}, 50);
 
-			}, true);
+				}, false);
+				var startY, startTop;
+				var hasInit = false;
+				var translateY = 0, endTranslateY = 0;
+				el.addEventListener("touchstart", function(e) {
+					if (!hasInit) {
+						$pulltorefresh.get(0).init();
+						pulltorefreshHeight = $pulltorefresh.height();
+						hasInit = true;
+					}
+					startY = e.touches[0].pageY;
+					startTop = $(this).scrollTop();
 
-			var ret = {
-				refreshComplete : function() {
-				    isRefreshing = false;
+				}, true);
+				el.addEventListener("touchmove", function(e) {
+					var deltaY = (e.touches[0].pageY - startY) * 0.35;
+
+					if (!isRefreshing) {
+						if ($(this).scrollTop() <= 0) {
+							if (deltaY > 0 && endTranslateY == 0) {
+								translateY = $(this).scrollTop() + deltaY;
+								translateDom($(this).scrollTop() + deltaY, 0);
+								e.preventDefault();
+							}
+
+						} else {
+							startY = e.touches[0].pageY;
+						}
+					}
+
+				}, true);
+
+				var isRefreshing = false;
+
+				el.addEventListener("touchend", function(e) {
+					if (!isRefreshing) {
+						if (translateY - $(el).scrollTop() >= pulltorefreshHeight) {
+							translateY = pulltorefreshHeight;
+							endTranslateY = translateY;
+							translateDom(pulltorefreshHeight, 200);
+							$pulltorefresh.get(0).fireRefresh();
+							isRefreshing = true;
+							$pulltorefresh.get(0).className = "fox-refresher-status-loading";
+						} else {
+							self.refreshComplete();
+						}
+					}
+
+				}, true);
+
+				this.refreshComplete = function() {
+					isRefreshing = false;
 					$pulltorefresh.get(0).className = "fox-refresher-status-up";
 					translateDom(0, 200);
 					translateY = 0;
 					endTranslateY = 0;
 				}
 			}
-
-			return ret;
-
 		}
+
 		
-		function setupInfiniteScroll($infiniteScroll){
-		    var infiniteScroll = $infiniteScroll.get(0);
-		    $(this).bind("scroll",function(){
-		        if(this.scrollTop+$(this).height()>= infiniteScroll.getDistance(this.scrollHeight)){
-		            infiniteScroll.fireInfinite();
-		        }
-		       
-		    });
-		}
-
-		var pulltorefresh;
 
 		fox("fox-content", {
 			lifecycle : {
 				created : function() {
-				    var $pulltorefresh = $("fox-refresher",this);
-				    if($pulltorefresh.size()>0){
-				        pulltorefresh = setupPulltorefresh.call(this,$pulltorefresh);
-				    }
-				    var $infiniteScroll = $("fox-infinite-scroll",this);
-				    
-				    if($infiniteScroll.size()>0){
-				        setupInfiniteScroll.call(this,$infiniteScroll);
-				    }
-				    
+					var $pulltorefresh = $("fox-refresher", this);
+					this._FoxContent = new FoxContent(this);
+					if ($pulltorefresh.size() > 0) {
+						pulltorefresh = this._FoxContent.setupPulltorefresh($pulltorefresh);
+					}
+					var $infiniteScroll = $("fox-infinite-scroll", this);
+
+					if ($infiniteScroll.size() > 0) {
+						this._FoxContent.setupInfiniteScroll($infiniteScroll);
+					}
+
 				},
 				inserted : function() {
 
@@ -194,10 +200,10 @@
 			methods : {
 				_refreshComplete : function() {
 
-					pulltorefresh && pulltorefresh.refreshComplete();
+					this._FoxContent.refreshComplete&&this._FoxContent.refreshComplete();
 				}
 			}
 		});
-    </script>
+	</script>
 
 </fox-element>
