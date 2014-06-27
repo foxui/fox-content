@@ -132,8 +132,9 @@
 				}, true);
 				el.addEventListener("touchmove", function(e) {
 					var deltaY = (e.touches[0].pageY - startY) * 0.35;
-
-					if (!isRefreshing) {
+					
+					if (!self.isRefreshing) {
+						
 						if ($(this).scrollTop() <= 0) {
 							if (deltaY > 0 && endTranslateY == 0) {
 								translateY = $(this).scrollTop() + deltaY;
@@ -148,10 +149,10 @@
 
 				}, true);
 
-				var isRefreshing = false;
+				this.isRefreshing = false;
 
 				el.addEventListener("touchend", function(e) {
-					if (!isRefreshing) {
+					if (!self.isRefreshing) {
 						if (translateY - $(el).scrollTop() >= pulltorefreshHeight) {
 							translateY = pulltorefreshHeight;
 							endTranslateY = translateY;
@@ -167,7 +168,8 @@
 				}, true);
 
 				this.refreshComplete = function() {
-					isRefreshing = false;
+					this.isRefreshing = false;
+					
 					$pulltorefresh.get(0).className = "fox-refresher-status-up";
 					translateDom(0, 200);
 					translateY = 0;
